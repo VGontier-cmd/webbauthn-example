@@ -227,8 +227,6 @@ Dans ce projet, les challenges utilisent **deux mécanismes de protection** :
 - Permet de gérer les retards réseau
 - Standard de l'industrie (recommandé : 3-10 minutes)
 
-> 📖 **Pour plus de détails** : Voir `CHALLENGE_EXPIRATION.md` pour une explication complète des alternatives et compromis.
-
 ### Flux d'enregistrement d'une passkey
 
 ```

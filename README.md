@@ -201,10 +201,17 @@ Le challenge lie la requête d'authentification à une session spécifique :
 
 #### 4. **Timeout et expiration**
 
-Dans ce projet, les challenges :
-- Expirent après 5 minutes (nettoyage automatique)
-- Sont supprimés après usage (one-time use)
-- Ne peuvent pas être réutilisés
+Dans ce projet, les challenges utilisent **deux mécanismes de protection** :
+
+**Protection principale : One-Time Use (Sécurité)**
+- Challenge supprimé **immédiatement** après vérification
+- Empêche les attaques de replay
+- C'est le mécanisme de sécurité principal
+
+**Protection secondaire : Expiration temporelle (Nettoyage mémoire)**
+- Challenge expiré après 5 minutes si non utilisé
+- Gère les flux abandonnés (utilisateur ferme le navigateur, etc.)
+- Évite les fuites mémoire
 
 **Exemple d'attaque bloquée** :
 ```
@@ -214,6 +221,13 @@ Dans ce projet, les challenges :
 4. L'ancienne signature ne correspond pas au nouveau challenge
 5. ❌ Authentification échouée
 ```
+
+**Pourquoi 5 minutes ?**
+- Compromis entre sécurité et expérience utilisateur
+- Permet de gérer les retards réseau
+- Standard de l'industrie (recommandé : 3-10 minutes)
+
+> 📖 **Pour plus de détails** : Voir `CHALLENGE_EXPIRATION.md` pour une explication complète des alternatives et compromis.
 
 ### Flux d'enregistrement d'une passkey
 

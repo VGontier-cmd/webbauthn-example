@@ -14,6 +14,7 @@ import * as bcrypt from "bcrypt";
 import { Repository } from "typeorm";
 import { Credential } from "../entities/credential.entity";
 import { User } from "../entities/user.entity";
+import { RedisService } from "../redis/redis.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 
@@ -24,47 +25,30 @@ export class AuthService {
   private rpID = "localhost"; // RP domain (must match app domain)
   private origin = process.env.ORIGIN || "http://localhost:5173"; // Authorized origin
 
-  /**
-   * In-memory storage for WebAuthn challenges
-   *
-   * Structure:
-   * - Key: "reg-{userId}" or "auth-{userId}" or "auth-email-{email}"
-   * - Value: { challenge: string, timestamp: number, userId?: string }
-   *
-   * Why store challenges?
-   * - Anti-replay: Prevents signature reuse
-   * - Security: Challenge must be unique and used only once
-   * - Validation: Backend verifies that signed challenge matches the generated one
-   *
-   * Note: In production, use Redis or a database for persistence
-   */
-  private challenges: Map<
-    string,
-    { challenge: string; timestamp: number; userId?: string }
-  > = new Map();
+  // Challenge expiration time in seconds (5 minutes)
+  // Redis will automatically expire challenges after this TTL
+  private readonly challengeTTL = 300;
 
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Credential)
-    private credentialRepository: Repository<Credential>
+    private credentialRepository: Repository<Credential>,
+    private redisService: RedisService
   ) {
     /**
-     * Automatic cleanup of expired challenges
+     * ✅ NO MORE setInterval cleanup needed!
      *
-     * Challenges expire after 5 minutes for security reasons.
-     * An interval automatically cleans up expired challenges.
+     * Redis automatically expires challenges via TTL (Time To Live).
+     * When we store a challenge with setChallenge(key, challenge, ttlSeconds),
+     * Redis automatically deletes it after ttlSeconds.
+     *
+     * This is much better than in-memory storage because:
+     * - Automatic expiration (no cleanup job needed)
+     * - Faster (in-memory)
+     * - Persistent (survives server restarts with appendonly)
+     * - Scalable (works with multiple backend instances)
      */
-    setInterval(() => {
-      const now = Date.now();
-      const expirationTime = 300000; // 5 minutes in milliseconds
-
-      for (const [key, value] of this.challenges.entries()) {
-        if (now - value.timestamp > expirationTime) {
-          this.challenges.delete(key);
-        }
-      }
-    }, 300000); // Runs cleanup every 5 minutes
   }
 
   /**
@@ -224,15 +208,18 @@ export class AuthService {
     });
 
     /**
-     * Store challenge for later verification
+     * Store challenge in Redis with automatic TTL
      *
+     * Redis will automatically delete this challenge after challengeTTL seconds.
      * The challenge is unique and can only be used once.
      * It will be verified during verifyRegistration().
      */
-    this.challenges.set(`reg-${userId}`, {
-      challenge: options.challenge,
-      timestamp: Date.now(),
-    });
+    const challengeKey = `reg-${userId}`;
+    await this.redisService.setChallenge(
+      challengeKey,
+      options.challenge,
+      this.challengeTTL
+    );
 
     return options;
   }
@@ -268,8 +255,8 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
-    // Get stored challenge (and immediate deletion)
-    const expectedChallenge = this.getExpectedChallenge(userId, "reg");
+    // Get stored challenge (and immediate deletion for one-time use)
+    const expectedChallenge = await this.getExpectedChallenge(userId, "reg");
 
     // Verify attestation response
     let verification;
@@ -350,11 +337,13 @@ export class AuthService {
       timeout: 60000,
     });
 
-    // Store challenge for verification
-    this.challenges.set(`auth-${userId}`, {
-      challenge: options.challenge,
-      timestamp: Date.now(),
-    });
+    // Store challenge in Redis with automatic TTL
+    const challengeKey = `auth-${userId}`;
+    await this.redisService.setChallenge(
+      challengeKey,
+      options.challenge,
+      this.challengeTTL
+    );
 
     return options;
   }
@@ -400,15 +389,17 @@ export class AuthService {
     });
 
     /**
-     * Store challenge with email as key
+     * Store challenge in Redis with email as key
      *
-     * We also store userId to use it during verification.
+     * Redis automatically expires this after challengeTTL seconds.
+     * Note: We don't store userId separately - we can get it from the user lookup.
      */
-    this.challenges.set(`auth-email-${email}`, {
-      challenge: options.challenge,
-      timestamp: Date.now(),
-      userId: user.id,
-    });
+    const challengeKey = `auth-email-${email}`;
+    await this.redisService.setChallenge(
+      challengeKey,
+      options.challenge,
+      this.challengeTTL
+    );
 
     return options;
   }
@@ -456,8 +447,8 @@ export class AuthService {
       throw new BadRequestException("Credential not found");
     }
 
-    // Get stored challenge
-    const expectedChallenge = this.getExpectedChallenge(userId, "auth");
+    // Get stored challenge (and immediate deletion for one-time use)
+    const expectedChallenge = await this.getExpectedChallenge(userId, "auth");
 
     // Verify assertion response
     let verification;
@@ -536,19 +527,20 @@ export class AuthService {
       throw new BadRequestException("Credential not found");
     }
 
-    // Get stored challenge with email
+    // Get stored challenge with email from Redis
     const challengeKey = `auth-email-${email}`;
-    const stored = this.challenges.get(challengeKey);
+    const expectedChallenge =
+      await this.redisService.getChallenge(challengeKey);
 
-    if (!stored) {
+    if (!expectedChallenge) {
       throw new BadRequestException(
-        "Challenge not found. Please request new options."
+        "Challenge not found or expired. Please request new options."
       );
     }
 
-    const expectedChallenge = stored.challenge;
-    // Immediate challenge deletion (single use)
-    this.challenges.delete(challengeKey);
+    // Immediate challenge deletion (one-time use)
+    // This is the main security mechanism - delete immediately after retrieval
+    await this.redisService.deleteChallenge(challengeKey);
 
     // Verify response
     let verification;
@@ -579,7 +571,7 @@ export class AuthService {
     credential.counter = authenticationInfo.newCounter;
     await this.credentialRepository.save(credential);
 
-    // Retourne l'utilisateur pour la connexion
+    // Return user for login
     return {
       verified: true,
       user: {
@@ -615,37 +607,46 @@ export class AuthService {
   }
 
   /**
-   * Get and delete a stored challenge
+   * Get and delete a stored challenge from Redis
    *
    * Challenges are single-use:
    * - Once retrieved, they are immediately deleted
    * - This prevents replay attacks
    *
+   * Redis TTL handles automatic expiration for abandoned flows.
+   * This method handles immediate deletion for one-time use (security).
+   *
    * @param userId - User ID or email
    * @param type - Challenge type ("reg" for registration, "auth" for authentication)
    * @returns The expected challenge
-   * @throws BadRequestException if challenge doesn't exist
+   * @throws BadRequestException if challenge doesn't exist or expired
    *
    * @private
    */
-  private getExpectedChallenge(userId: string, type: "reg" | "auth"): string {
+  private async getExpectedChallenge(
+    userId: string,
+    type: "reg" | "auth"
+  ): Promise<string> {
     const key = `${type}-${userId}`;
-    const stored = this.challenges.get(key);
 
-    if (!stored) {
+    // Get challenge from Redis
+    const challenge = await this.redisService.getChallenge(key);
+
+    if (!challenge) {
       throw new BadRequestException(
-        "Challenge not found. Please request new options."
+        "Challenge not found or expired. Please request new options."
       );
     }
 
     /**
-     * Immediate challenge deletion after retrieval
+     * Immediate challenge deletion after retrieval (one-time use)
      *
-     * A challenge can only be used once.
+     * This is the main security mechanism.
+     * Even if Redis TTL hasn't expired, we delete it now to prevent reuse.
      * This ensures a signature cannot be reused.
      */
-    this.challenges.delete(key);
+    await this.redisService.deleteChallenge(key);
 
-    return stored.challenge;
+    return challenge;
   }
 }

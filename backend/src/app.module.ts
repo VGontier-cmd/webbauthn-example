@@ -5,6 +5,7 @@ import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
 import { Credential } from "./entities/credential.entity";
 import { User } from "./entities/user.entity";
+import { RedisModule } from "./redis/redis.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { User } from "./entities/user.entity";
       synchronize: true,
     }),
     TypeOrmModule.forFeature([User, Credential]),
+    RedisModule,
     AuthModule,
   ],
   controllers: [AppController],

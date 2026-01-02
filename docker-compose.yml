@@ -18,6 +18,20 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: webauthn-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
@@ -29,8 +43,11 @@ services:
       DATABASE_URL: postgresql://webauthn:webauthn123@postgres:5432/webauthn_db
       PORT: 3001
       ORIGIN: http://localhost:5173
+      REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - ./backend:/app
@@ -53,3 +70,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

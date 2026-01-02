@@ -10,7 +10,7 @@ import {
   verifyAuthenticationResponse,
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
-import * as bcrypt from "bcrypt";
+import bcrypt from "bcrypt";
 import { Repository } from "typeorm";
 import { Credential } from "../entities/credential.entity";
 import { User } from "../entities/user.entity";

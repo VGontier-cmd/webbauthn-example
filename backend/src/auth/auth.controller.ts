@@ -1,12 +1,12 @@
 /**
- * Contrôleur d'authentification
+ * Authentication Controller
  *
- * Expose les endpoints REST pour :
- * - L'inscription et la connexion classique (email/password)
- * - L'enregistrement et l'authentification WebAuthn (passkeys)
- * - La gestion des utilisateurs et des passkeys
+ * Exposes REST endpoints for:
+ * - Traditional registration and login (email/password)
+ * - WebAuthn registration and authentication (passkeys)
+ * - User and passkey management
  *
- * Tous les endpoints sont préfixés par "/auth"
+ * All endpoints are prefixed with "/auth"
  *
  * @module auth/auth.controller
  */
@@ -22,10 +22,10 @@ export class AuthController {
   /**
    * POST /auth/register
    *
-   * Inscription d'un nouvel utilisateur
+   * Register a new user
    *
-   * @param registerDto - Données d'inscription (email, password, firstName, lastName)
-   * @returns Utilisateur créé (sans le mot de passe)
+   * @param registerDto - Registration data (email, password, firstName, lastName)
+   * @returns Created user (without password)
    */
   @Post("register")
   async register(@Body() registerDto: RegisterDto) {
@@ -35,10 +35,10 @@ export class AuthController {
   /**
    * POST /auth/login
    *
-   * Connexion avec email et mot de passe
+   * Login with email and password
    *
-   * @param loginDto - Email et mot de passe
-   * @returns Utilisateur connecté (sans le mot de passe)
+   * @param loginDto - Email and password
+   * @returns Logged in user (without password)
    */
   @Post("login")
   async login(@Body() loginDto: LoginDto) {
@@ -48,10 +48,10 @@ export class AuthController {
   /**
    * GET /auth/user/:userId
    *
-   * Récupère les informations d'un utilisateur avec ses passkeys
+   * Get user information with their passkeys
    *
-   * @param userId - ID unique de l'utilisateur
-   * @returns Utilisateur avec ses passkeys enregistrées
+   * @param userId - Unique user ID
+   * @returns User with registered passkeys
    */
   @Get("user/:userId")
   async getUser(@Param("userId") userId: string) {
@@ -61,13 +61,13 @@ export class AuthController {
   /**
    * POST /auth/webauthn/register/options/:userId
    *
-   * Génère les options d'enregistrement d'une nouvelle passkey
+   * Generate registration options for a new passkey
    *
-   * Utilisé depuis le dashboard pour ajouter une nouvelle passkey.
-   * Le backend génère un challenge unique et retourne les options WebAuthn.
+   * Used from the dashboard to add a new passkey.
+   * The backend generates a unique challenge and returns WebAuthn options.
    *
-   * @param userId - ID de l'utilisateur qui enregistre la passkey
-   * @returns Options WebAuthn pour l'enregistrement (challenge, RP info, etc.)
+   * @param userId - ID of the user registering the passkey
+   * @returns WebAuthn options for registration (challenge, RP info, etc.)
    */
   @Post("webauthn/register/options/:userId")
   async generateRegistrationOptions(@Param("userId") userId: string) {
@@ -77,15 +77,15 @@ export class AuthController {
   /**
    * POST /auth/webauthn/register/verify/:userId
    *
-   * Vérifie l'enregistrement d'une nouvelle passkey
+   * Verify registration of a new passkey
    *
-   * Après que l'authentificateur ait créé la passkey et signé le challenge,
-   * cette méthode vérifie la signature et stocke la passkey dans la base de données.
+   * After the authenticator creates the passkey and signs the challenge,
+   * this method verifies the signature and stores the passkey in the database.
    *
-   * @param userId - ID de l'utilisateur
-   * @param body.response - Réponse d'attestation de l'authentificateur
-   * @param body.deviceType - Type d'appareil (iOS, Android, Desktop)
-   * @returns { verified: true } si l'enregistrement est réussi
+   * @param userId - User ID
+   * @param body.response - Attestation response from the authenticator
+   * @param body.deviceType - Device type (iOS, Android, Desktop)
+   * @returns { verified: true } if registration is successful
    */
   @Post("webauthn/register/verify/:userId")
   async verifyRegistration(
@@ -102,12 +102,12 @@ export class AuthController {
   /**
    * POST /auth/webauthn/authenticate/options/:userId
    *
-   * Génère les options d'authentification pour tester une passkey
+   * Generate authentication options to test a passkey
    *
-   * Utilisé depuis le dashboard pour tester l'authentification avec une passkey existante.
+   * Used from the dashboard to test authentication with an existing passkey.
    *
-   * @param userId - ID de l'utilisateur
-   * @returns Options WebAuthn pour l'authentification (challenge, credential IDs, etc.)
+   * @param userId - User ID
+   * @returns WebAuthn options for authentication (challenge, credential IDs, etc.)
    */
   @Post("webauthn/authenticate/options/:userId")
   async generateAuthenticationOptions(@Param("userId") userId: string) {
@@ -117,14 +117,14 @@ export class AuthController {
   /**
    * POST /auth/webauthn/authenticate/verify/:userId
    *
-   * Vérifie l'authentification avec une passkey (depuis le dashboard)
+   * Verify authentication with a passkey (from dashboard)
    *
-   * Après que l'authentificateur ait signé le challenge, cette méthode
-   * vérifie la signature avec la clé publique stockée.
+   * After the authenticator signs the challenge, this method
+   * verifies the signature with the stored public key.
    *
-   * @param userId - ID de l'utilisateur
-   * @param body.response - Réponse d'assertion signée par l'authentificateur
-   * @returns { verified: true } si l'authentification est réussie
+   * @param userId - User ID
+   * @param body.response - Signed assertion response from the authenticator
+   * @returns { verified: true } if authentication is successful
    */
   @Post("webauthn/authenticate/verify/:userId")
   async verifyAuthentication(
@@ -137,10 +137,10 @@ export class AuthController {
   /**
    * POST /auth/webauthn/credential/:userId/:credentialId
    *
-   * Supprime une passkey enregistrée
+   * Delete a registered passkey
    *
-   * @param userId - ID de l'utilisateur
-   * @param credentialId - ID de la passkey à supprimer
+   * @param userId - User ID
+   * @param credentialId - ID of the passkey to delete
    * @returns { success: true }
    */
   @Post("webauthn/credential/:userId/:credentialId")
@@ -154,13 +154,13 @@ export class AuthController {
   /**
    * POST /auth/webauthn/login/options
    *
-   * Génère les options d'authentification pour la connexion par passkey
+   * Generate authentication options for passkey login
    *
-   * Utilisé lors du login : le backend trouve l'utilisateur par email,
-   * récupère ses passkeys, et génère un challenge unique.
+   * Used during login: the backend finds the user by email,
+   * retrieves their passkeys, and generates a unique challenge.
    *
-   * @param body.email - Email de l'utilisateur
-   * @returns Options WebAuthn contenant le challenge et les credential IDs autorisés
+   * @param body.email - User's email
+   * @returns WebAuthn options containing the challenge and allowed credential IDs
    */
   @Post("webauthn/login/options")
   async generateLoginOptions(@Body() body: { email: string }) {
@@ -170,14 +170,14 @@ export class AuthController {
   /**
    * POST /auth/webauthn/login/verify
    *
-   * Vérifie l'authentification lors de la connexion par passkey
+   * Verify authentication during passkey login
    *
-   * Après que l'authentificateur ait signé le challenge, cette méthode
-   * vérifie la signature avec la clé publique stockée et retourne l'utilisateur.
+   * After the authenticator signs the challenge, this method
+   * verifies the signature with the stored public key and returns the user.
    *
-   * @param body.email - Email de l'utilisateur
-   * @param body.response - Réponse d'assertion signée par l'authentificateur
-   * @returns { verified: true, user: User } si l'authentification est réussie
+   * @param body.email - User's email
+   * @param body.response - Signed assertion response from the authenticator
+   * @returns { verified: true, user: User } if authentication is successful
    */
   @Post("webauthn/login/verify")
   async verifyLogin(@Body() body: { email: string; response: any }) {

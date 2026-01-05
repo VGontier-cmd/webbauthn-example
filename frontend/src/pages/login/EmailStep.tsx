@@ -58,8 +58,8 @@ export function EmailStep({
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Connexion</CardTitle>
-          <CardDescription>Entrez votre email pour continuer</CardDescription>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>Enter your email to continue</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -83,12 +83,12 @@ export function EmailStep({
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={!email}>
-              Continuer
+              Continue
             </Button>
             <p className="text-sm text-muted-foreground text-center">
-              Pas encore de compte ?{" "}
+              Don't have an account yet?{" "}
               <Link to="/register" className="text-primary hover:underline">
-                S'inscrire
+                Register
               </Link>
             </p>
           </CardFooter>

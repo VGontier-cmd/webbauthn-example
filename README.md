@@ -1,107 +1,111 @@
 # WebAuthn Example
 
-Un exemple complet d'implémentation WebAuthn avec authentification par passkeys, utilisant React, NestJS, PostgreSQL et Docker.
+A complete example of WebAuthn implementation with passkey authentication, using React, NestJS, PostgreSQL, and Docker.
 
-## 📋 Table des matières
+## 📋 Table of Contents
 
-- [Fonctionnalités](#-fonctionnalités)
+- [Features](#-features)
 - [Technologies](#-technologies)
-- [Prérequis](#-prérequis)
+- [Prerequisites](#-prerequisites)
 - [Installation](#-installation)
-- [Utilisation](#-utilisation)
-- [Comprendre WebAuthn : Flux et Challenges](#-comprendre-webauthn--flux-et-challenges)
-- [Structure du projet](#-structure-du-projet)
+- [⚠️ Security and Environment Variables](#️-security-and-environment-variables)
+- [Usage](#-usage)
+- [Understanding WebAuthn: Flows and Challenges](#-understanding-webauthn-flows-and-challenges)
+- [Project Structure](#-project-structure)
 - [API Endpoints](#-api-endpoints)
 - [Configuration](#-configuration)
-- [Développement](#-développement)
+- [Development](#-development)
 - [Production](#-production)
-- [Dépannage](#-dépannage)
+- [Troubleshooting](#-troubleshooting)
 - [License](#-license)
 
-## ✨ Fonctionnalités
+## ✨ Features
 
-### Authentification classique
-- ✅ **Inscription** avec email, mot de passe, prénom et nom
-- ✅ **Connexion** avec email et mot de passe
-- ✅ Validation des données avec class-validator
+### Traditional Authentication
+- ✅ **Registration** with email, password, first name, and last name
+- ✅ **Login** with email and password
+- ✅ Data validation with class-validator
 
-### Authentification WebAuthn
-- ✅ **Ajout de passkeys** depuis le dashboard
-- ✅ **Connexion par passkey** depuis la page de login
-- ✅ **Test d'authentification** depuis le dashboard
-- ✅ **Gestion des passkeys** : affichage et suppression
-- ✅ Détection automatique du type d'appareil (iOS, Android, Desktop)
+### WebAuthn Authentication
+- ✅ **Add passkeys** from the dashboard
+- ✅ **Login with passkey** from the login page
+- ✅ **Test authentication** from the dashboard
+- ✅ **Passkey management**: view and delete
+- ✅ Automatic device type detection (iOS, Android, Desktop)
 
-### Interface utilisateur
-- ✅ Interface moderne avec **Tailwind CSS** et **Shadcn UI**
-- ✅ Design responsive
-- ✅ Gestion des erreurs et feedback utilisateur
-- ✅ États de chargement
+### User Interface
+- ✅ Modern interface with **Tailwind CSS** and **Shadcn UI**
+- ✅ Responsive design
+- ✅ Error handling and user feedback
+- ✅ Loading states
 
 ## 🛠 Technologies
 
 ### Frontend
-- **React 18** - Bibliothèque UI
-- **TypeScript** - Typage statique
-- **Vite** - Build tool et dev server
-- **Tailwind CSS** - Framework CSS utility-first
-- **Shadcn UI** - Composants UI accessibles
-- **React Router** - Routage
-- **@simplewebauthn/browser** - Client WebAuthn
+- **React 18** - UI library
+- **TypeScript** - Static typing
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Shadcn UI** - Accessible UI components
+- **React Router** - Routing
+- **@simplewebauthn/browser** - WebAuthn client
 
 ### Backend
-- **NestJS** - Framework Node.js
-- **TypeScript** - Typage statique
-- **TypeORM** - ORM pour PostgreSQL
-- **PostgreSQL** - Base de données relationnelle
-- **@simplewebauthn/server** - Serveur WebAuthn
-- **bcrypt** - Hashage des mots de passe
-- **class-validator** - Validation des DTOs
+- **NestJS** - Node.js framework
+- **TypeScript** - Static typing
+- **TypeORM** - ORM for PostgreSQL
+- **PostgreSQL** - Relational database
+- **@simplewebauthn/server** - WebAuthn server
+- **bcrypt** - Password hashing
+- **class-validator** - DTO validation
 
 ### Infrastructure
-- **Docker** & **Docker Compose** - Containerisation
-- **PostgreSQL 15** - Base de données
+- **Docker** & **Docker Compose** - Containerization
+- **PostgreSQL 15** - Database
+- **Redis** - Challenge storage with TTL
 
-## 📦 Prérequis
+## 📦 Prerequisites
 
-- **Docker** (version 20.10+) et **Docker Compose** (version 2.0+)
-- **Node.js** 20+ (pour le développement local)
-- **npm** ou **yarn**
+- **Docker** (version 20.10+) and **Docker Compose** (version 2.0+)
+- **Node.js** 20+ (for local development)
+- **npm** or **yarn**
 
 ## 🚀 Installation
 
-### Option 1 : Avec Docker (Recommandé)
+### Option 1: With Docker (Recommended)
 
-1. **Cloner le repository**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/VGontier-cmd/webbauthn-example.git
    cd webbauthn-example
    ```
 
-2. **Lancer tous les services**
+2. **Start all services**
    ```bash
    docker-compose up --build
    ```
 
-   Cette commande va :
-   - Construire les images Docker
-   - Démarrer PostgreSQL
-   - Démarrer le backend NestJS
-   - Démarrer le frontend React
+   This command will:
+   - Build Docker images
+   - Start PostgreSQL
+   - Start Redis
+   - Start the NestJS backend
+   - Start the React frontend
 
-3. **Accéder à l'application**
-   - Frontend : http://localhost:5173
-   - Backend API : http://localhost:3001
-   - PostgreSQL : localhost:5432
+3. **Access the application**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:3001
+   - PostgreSQL: localhost:5432
+   - Redis: localhost:6379
 
-### Option 2 : Développement local
+### Option 2: Local Development
 
-#### Base de données PostgreSQL
+#### PostgreSQL Database
 
-Assurez-vous d'avoir PostgreSQL installé et démarré, ou utilisez Docker uniquement pour la base de données :
+Make sure you have PostgreSQL installed and running, or use Docker only for the database:
 
 ```bash
-docker-compose up postgres -d
+docker-compose up postgres redis -d
 ```
 
 #### Backend
@@ -112,7 +116,7 @@ npm install
 npm run start:dev
 ```
 
-Le backend sera disponible sur http://localhost:3001
+The backend will be available at http://localhost:3001
 
 #### Frontend
 
@@ -122,321 +126,384 @@ npm install
 npm run dev
 ```
 
-Le frontend sera disponible sur http://localhost:5173
+The frontend will be available at http://localhost:5173
 
-## 📖 Utilisation
+## ⚠️ Security and Environment Variables
 
-### 1. Créer un compte
+### ⚠️ **IMPORTANT: Read before forking or deploying**
 
-1. Accédez à http://localhost:5173
-2. Cliquez sur "S'inscrire"
-3. Remplissez le formulaire :
-   - Prénom
-   - Nom
+This project uses **hardcoded environment variables** in `docker-compose.yml` to simplify the example. **This is NOT secure for production.**
+
+**For production use, you MUST:**
+
+1. **Create a `.env` file** at the project root:
+   ```bash
+   # .env
+   DATABASE_URL=postgresql://user:password@postgres:5432/dbname
+   POSTGRES_USER=your_user
+   POSTGRES_PASSWORD=your_secure_password
+   POSTGRES_DB=your_database
+   REDIS_URL=redis://redis:6379
+   PORT=3001
+   ORIGIN=http://localhost:5173
+   ```
+
+2. **Add `.env` to `.gitignore`**:
+   ```gitignore
+   .env
+   .env.local
+   .env.*.local
+   ```
+
+3. **Modify `docker-compose.yml`** to use environment variables:
+   ```yaml
+   environment:
+     DATABASE_URL: ${DATABASE_URL}
+     POSTGRES_USER: ${POSTGRES_USER}
+     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+     # etc.
+   ```
+
+4. **Create a `.env.example`** (without sensitive values) to document required variables:
+   ```bash
+   # .env.example
+   DATABASE_URL=postgresql://user:password@postgres:5432/dbname
+   POSTGRES_USER=example_user
+   POSTGRES_PASSWORD=example_password
+   POSTGRES_DB=example_db
+   REDIS_URL=redis://redis:6379
+   PORT=3001
+   ORIGIN=http://localhost:5173
+   ```
+
+**⚠️ Never commit:**
+- Passwords
+- Secret keys
+- API tokens
+- Database URLs with credentials
+
+**🔒 Best practices:**
+- Use strong and unique passwords
+- Change all default passwords
+- Use secrets managers in production (AWS Secrets Manager, HashiCorp Vault, etc.)
+- Enable Redis authentication if exposed publicly
+- Configure appropriate firewall rules
+
+## 📖 Usage
+
+### 1. Create an account
+
+1. Go to http://localhost:5173
+2. Click on "Register"
+3. Fill out the form:
+   - First name
+   - Last name
    - Email
-   - Mot de passe (minimum 6 caractères)
-4. Cliquez sur "S'inscrire"
+   - Password (minimum 6 characters)
+4. Click "Register"
 
-### 2. Se connecter avec mot de passe
+### 2. Login with password
 
-1. Sur la page de connexion, entrez votre email et mot de passe
-2. Cliquez sur "Se connecter avec mot de passe"
+1. On the login page, enter your email and password
+2. Click "Login with password"
 
-### 3. Ajouter une passkey
+### 3. Add a passkey
 
-1. Une fois connecté, vous arrivez sur le dashboard
-2. Cliquez sur "Ajouter une passkey"
-3. Suivez les instructions de votre navigateur/appareil :
-   - **Desktop** : Utilisez votre gestionnaire de mots de passe ou une clé de sécurité
-   - **iOS** : Utilisez Face ID ou Touch ID
-   - **Android** : Utilisez l'empreinte digitale ou le déverrouillage facial
-4. La passkey est maintenant enregistrée
+1. Once logged in, you'll be on the dashboard
+2. Click "Add a passkey"
+3. Follow your browser/device instructions:
+   - **Desktop**: Use your password manager or security key
+   - **iOS**: Use Face ID or Touch ID
+   - **Android**: Use fingerprint or facial unlock
+4. The passkey is now registered
 
-### 4. Se connecter avec une passkey
+### 4. Login with a passkey
 
-1. Sur la page de connexion, entrez votre email
-2. Cliquez sur "Se connecter avec une passkey"
-3. Confirmez avec votre méthode d'authentification (Face ID, Touch ID, etc.)
-4. Vous êtes automatiquement connecté
+1. On the login page, enter your email
+2. Click "Login with a passkey"
+3. Confirm with your authentication method (Face ID, Touch ID, etc.)
+4. You are automatically logged in
 
-### 5. Gérer vos passkeys
+### 5. Manage your passkeys
 
-Sur le dashboard, vous pouvez :
-- Voir toutes vos passkeys enregistrées
-- Tester une passkey avec le bouton "Tester la passkey"
-- Supprimer une passkey avec le bouton de suppression
+On the dashboard, you can:
+- View all your registered passkeys
+- Test a passkey with the "Test passkey" button
+- Delete a passkey with the delete button
 
-## 🔐 Comprendre WebAuthn : Flux et Challenges
+## 🔐 Understanding WebAuthn: Flows and Challenges
 
-### Pourquoi stocker un challenge ?
+### Why store a challenge?
 
-Le **challenge** est un élément crucial de la sécurité WebAuthn. Voici pourquoi il doit être stocké côté serveur :
+The **challenge** is a crucial element of WebAuthn security. Here's why it must be stored on the server side:
 
-#### 1. **Protection contre les attaques de rejeu (Replay Attacks)**
+#### 1. **Protection against replay attacks**
 
-Sans challenge, un attaquant pourrait :
-- Intercepter une réponse d'authentification valide
-- La réutiliser plus tard pour s'authentifier à votre place
+Without a challenge, an attacker could:
+- Intercept a valid authentication response
+- Reuse it later to authenticate as you
 
-**Avec le challenge** :
-- Le serveur génère un challenge unique et aléatoire
-- L'authentificateur signe ce challenge spécifique
-- Le serveur vérifie que la réponse correspond exactement au challenge qu'il a généré
-- Le challenge est supprimé après usage (one-time use)
-- Si quelqu'un réutilise une ancienne réponse, le challenge ne correspondra plus → **Échec**
+**With the challenge**:
+- The server generates a unique and random challenge
+- The authenticator signs this specific challenge
+- The server verifies that the response exactly matches the challenge it generated
+- The challenge is deleted after use (one-time use)
+- If someone reuses an old response, the challenge won't match anymore → **Failure**
 
-#### 2. **Vérification de l'authenticité**
+#### 2. **Authenticity verification**
 
-Le challenge permet de vérifier que :
-- La réponse vient bien de l'authentificateur qui possède la clé privée
-- La réponse n'a pas été modifiée en transit
-- La réponse est récente (grâce au timeout)
+The challenge allows verification that:
+- The response comes from the authenticator that owns the private key
+- The response hasn't been modified in transit
+- The response is recent (thanks to timeout)
 
-#### 3. **Liaison avec la session**
+#### 3. **Session binding**
 
-Le challenge lie la requête d'authentification à une session spécifique :
-- Challenge généré → Stocké avec l'ID utilisateur
-- Réponse reçue → Vérifiée contre le challenge stocké
-- Challenge supprimé → Empêche la réutilisation
+The challenge links the authentication request to a specific session:
+- Challenge generated → Stored with user ID
+- Response received → Verified against stored challenge
+- Challenge deleted → Prevents reuse
 
-#### 4. **Timeout et expiration**
+#### 4. **Timeout and expiration**
 
-Dans ce projet, les challenges utilisent **deux mécanismes de protection** :
+In this project, challenges use **two protection mechanisms**:
 
-**Protection principale : One-Time Use (Sécurité)**
-- Challenge supprimé **immédiatement** après vérification
-- Empêche les attaques de replay
-- C'est le mécanisme de sécurité principal
+**Primary protection: One-Time Use (Security)**
+- Challenge deleted **immediately** after verification
+- Prevents replay attacks
+- This is the main security mechanism
 
-**Protection secondaire : Expiration temporelle (Nettoyage mémoire)**
-- Challenge expiré après 5 minutes si non utilisé
-- Gère les flux abandonnés (utilisateur ferme le navigateur, etc.)
-- Évite les fuites mémoire
+**Secondary protection: Temporal expiration (Memory cleanup)**
+- Challenge expires after 5 minutes if unused
+- Handles abandoned flows (user closes browser, etc.)
+- Prevents memory leaks
 
-**Exemple d'attaque bloquée** :
+**Example of blocked attack**:
 ```
-1. Attaquant intercepte : { challenge: "ABC123", signature: "xyz..." }
-2. Attaquant tente de réutiliser cette réponse
-3. Serveur génère un NOUVEAU challenge : "DEF456"
-4. L'ancienne signature ne correspond pas au nouveau challenge
-5. ❌ Authentification échouée
+1. Attacker intercepts: { challenge: "ABC123", signature: "xyz..." }
+2. Attacker attempts to reuse this response
+3. Server generates a NEW challenge: "DEF456"
+4. Old signature doesn't match new challenge
+5. ❌ Authentication failed
 ```
 
-**Pourquoi 5 minutes ?**
-- Compromis entre sécurité et expérience utilisateur
-- Permet de gérer les retards réseau
-- Standard de l'industrie (recommandé : 3-10 minutes)
+**Why 5 minutes?**
+- Compromise between security and user experience
+- Allows handling network delays
+- Industry standard (recommended: 3-10 minutes)
 
-### Flux d'enregistrement d'une passkey
+### Passkey registration flow
 
 ```
 ┌─────────┐         ┌─────────┐         ┌──────────┐         ┌─────────────┐
-│Frontend │         │ Backend │         │Navigateur│         │Authentif.   │
+│Frontend │         │ Backend │         │Navigator │         │Authenticator│
 └────┬────┘         └────┬────┘         └────┬─────┘         └──────┬──────┘
      │                    │                    │                      │
      │ 1. generateOptions│                    │                      │
      │───────────────────>│                    │                      │
-     │                    │ • Récupère user     │                      │
-     │                    │ • Génère challenge  │                      │
-     │                    │ • Stocke challenge  │                      │
-     │                    │   (reg-{userId})    │                      │
-     │                    │ • Exclut passkeys   │                      │
-     │                    │   existantes        │                      │
+     │                    │ • Get user         │                      │
+     │                    │ • Generate challenge│                      │
+     │                    │ • Store challenge  │                      │
+     │                    │   (reg-{userId})   │                      │
+     │                    │ • Exclude existing │                      │
+     │                    │   passkeys         │                      │
      │<───────────────────│                    │                      │
      │    options          │                    │                      │
-     │  (challenge inclus) │                    │                      │
+     │  (challenge included)│                    │                      │
      │                    │                    │                      │
      │ 2. startRegistration│                    │                      │
      │─────────────────────┼───────────────────>│                      │
-     │                    │                    │ 3. Demande confirm.  │
+     │                    │                    │ 3. Request confirm.  │
      │                    │                    │    (Touch/Face ID)  │
      │                    │                    │─────────────────────>│
      │                    │                    │                      │
-     │                    │                    │ 4. Génère clés       │
-     │                    │                    │    Signe challenge   │
-     │                    │                    │    Crée attestation  │
+     │                    │                    │ 4. Generate keys    │
+     │                    │                    │    Sign challenge   │
+     │                    │                    │    Create attestation│
      │                    │                    │<─────────────────────│
      │                    │                    │                      │
      │<────────────────────┼────────────────────│                      │
      │ attestationResponse │                    │                      │
-     │  (signature incluse)│                    │                      │
+     │  (signature included)│                    │                      │
      │                    │                    │                      │
      │ 5. verifyRegistration│                    │                      │
      │───────────────────>│                    │                      │
-     │                    │ • Récupère challenge│                      │
-     │                    │ • Vérifie challenge │                      │
-     │                    │ • Vérifie signature │                      │
-     │                    │ • Vérifie origin    │                      │
-     │                    │ • Extrait clé pub.   │                      │
-     │                    │ • Sauvegarde passkey│                      │
-     │                    │ • Supprime challenge│                      │
+     │                    │ • Get challenge    │                      │
+     │                    │ • Verify challenge │                      │
+     │                    │ • Verify signature │                      │
+     │                    │ • Verify origin    │                      │
+     │                    │ • Extract pub. key│                      │
+     │                    │ • Save passkey     │                      │
+     │                    │ • Delete challenge│                      │
      │<───────────────────│                    │                      │
      │    success          │                    │                      │
 ```
 
-**Étapes détaillées** :
+**Detailed steps**:
 
-1. **Génération des options** :
-   - Le backend génère un challenge aléatoire unique
-   - Le challenge est stocké en mémoire avec la clé `reg-{userId}`
-   - Les options incluent le challenge, l'ID utilisateur, le domaine, etc.
+1. **Options generation**:
+   - The backend generates a unique random challenge
+   - The challenge is stored in Redis with key `reg-{userId}`
+   - Options include the challenge, user ID, domain, etc.
 
-2. **Interaction navigateur** :
-   - Le navigateur demande confirmation à l'utilisateur
-   - L'authentificateur génère une paire de clés (privée/publique)
-   - La clé privée reste dans l'authentificateur (jamais exposée)
-   - L'authentificateur signe le challenge avec la clé privée
+2. **Browser interaction**:
+   - The browser requests user confirmation
+   - The authenticator generates a key pair (private/public)
+   - The private key stays in the authenticator (never exposed)
+   - The authenticator signs the challenge with the private key
 
-3. **Vérification** :
-   - Le backend récupère le challenge stocké
-   - Vérifie que la signature correspond au challenge
-   - Si valide, sauvegarde la clé publique et supprime le challenge
+3. **Verification**:
+   - The backend retrieves the stored challenge
+   - Verifies that the signature matches the challenge
+   - If valid, saves the public key and deletes the challenge
 
-### Flux d'authentification avec une passkey
+### Passkey authentication flow
 
 ```
 ┌─────────┐         ┌─────────┐         ┌──────────┐         ┌─────────────┐
-│Frontend │         │ Backend │         │Navigateur│         │Authentif.   │
+│Frontend │         │ Backend │         │Navigator │         │Authenticator│
 └────┬────┘         └────┬────┘         └────┬─────┘         └──────┬──────┘
      │                    │                    │                      │
      │ 1. generateOptions │                    │                      │
-     │    (email)          │                    │                      │
+     │    (email)         │                    │                      │
      │───────────────────>│                    │                      │
-     │                    │ • Trouve user       │                      │
-     │                    │ • Récupère passkeys │                      │
-     │                    │ • Génère challenge  │                      │
-     │                    │ • Stocke challenge  │                      │
+     │                    │ • Find user        │                      │
+     │                    │ • Get passkeys     │                      │
+     │                    │ • Generate challenge│                      │
+     │                    │ • Store challenge  │                      │
      │                    │   (auth-email-{email})│                    │
-     │                    │ • Liste credential  │                      │
-     │                    │   IDs autorisés     │                      │
+     │                    │ • List credential  │                      │
+     │                    │   IDs allowed      │                      │
      │<───────────────────│                    │                      │
      │    options          │                    │                      │
-     │  (challenge inclus) │                    │                      │
+     │  (challenge included)│                    │                      │
      │                    │                    │                      │
      │ 2. startAuthentication│                    │                      │
      │─────────────────────┼───────────────────>│                      │
-     │                    │                    │ 3. Trouve passkey    │
-     │                    │                    │    par credential ID  │
-     │                    │                    │    Demande confirm.   │
+     │                    │                    │ 3. Find passkey      │
+     │                    │                    │    by credential ID  │
+     │                    │                    │    Request confirm.  │
      │                    │                    │─────────────────────>│
      │                    │                    │                      │
-     │                    │                    │ 4. Signe challenge   │
-     │                    │                    │    avec clé privée   │
-     │                    │                    │    Incrémente counter│
+     │                    │                    │ 4. Sign challenge   │
+     │                    │                    │    with private key │
+     │                    │                    │    Increment counter │
      │                    │                    │<─────────────────────│
      │                    │                    │                      │
      │<────────────────────┼────────────────────│                      │
      │ assertionResponse  │                    │                      │
-     │  (signature incluse)│                    │                      │
+     │  (signature included)│                    │                      │
      │                    │                    │                      │
      │ 3. verifyLogin      │                    │                      │
      │    (email + response)│                    │                      │
      │───────────────────>│                    │                      │
-     │                    │ • Trouve user       │                      │
-     │                    │ • Trouve passkey    │                      │
-     │                    │ • Récupère challenge│                      │
-     │                    │ • Vérifie challenge │                      │
-     │                    │ • Vérifie signature │                      │
-     │                    │   (avec clé pub.)   │                      │
-     │                    │ • Vérifie counter  │                      │
-     │                    │ • Met à jour counter│                      │
-     │                    │ • Supprime challenge│                      │
+     │                    │ • Find user        │                      │
+     │                    │ • Find passkey     │                      │
+     │                    │ • Get challenge    │                      │
+     │                    │ • Verify challenge │                      │
+     │                    │ • Verify signature │                      │
+     │                    │   (with pub. key)  │                      │
+     │                    │ • Verify counter  │                      │
+     │                    │ • Update counter  │                      │
+     │                    │ • Delete challenge │                      │
      │<───────────────────│                    │                      │
      │    user data        │                    │                      │
 ```
 
-**Étapes détaillées** :
+**Detailed steps**:
 
-1. **Génération des options** :
-   - L'utilisateur entre son email
-   - Le backend trouve l'utilisateur et ses passkeys
-   - Génère un nouveau challenge unique
-   - Stocke le challenge avec la clé `auth-email-{email}`
-   - Retourne les credential IDs autorisés
+1. **Options generation**:
+   - User enters their email
+   - Backend finds user and their passkeys
+   - Generates a new unique challenge
+   - Stores challenge with key `auth-email-{email}`
+   - Returns allowed credential IDs
 
-2. **Interaction navigateur** :
-   - Le navigateur trouve la passkey correspondante
-   - Demande confirmation (Touch ID, Face ID, etc.)
-   - L'authentificateur signe le challenge
-   - Incrémente le compteur anti-replay
+2. **Browser interaction**:
+   - Browser finds corresponding passkey
+   - Requests confirmation (Touch ID, Face ID, etc.)
+   - Authenticator signs the challenge
+   - Increments anti-replay counter
 
-3. **Vérification** :
-   - Le backend récupère le challenge stocké
-   - Vérifie la signature avec la clé publique
-   - Vérifie que le compteur a augmenté
-   - Met à jour le compteur en base
-   - Supprime le challenge (usage unique)
+3. **Verification**:
+   - Backend retrieves stored challenge
+   - Verifies signature with public key
+   - Verifies counter has increased
+   - Updates counter in database
+   - Deletes challenge (one-time use)
 
-### Stockage des challenges dans ce projet
+### Challenge storage in this project
 
-**Implémentation actuelle** (mémoire) :
+**Current implementation** (Redis with TTL):
 ```typescript
-private challenges: Map<string, { challenge: string; timestamp: number }> = new Map();
+// Storage
+await this.redisService.setChallenge(
+  `reg-${userId}`,
+  options.challenge,
+  300 // 5 minutes TTL
+);
 
-// Stockage
-this.challenges.set(`reg-${userId}`, {
-  challenge: options.challenge,
-  timestamp: Date.now(),
-});
-
-// Récupération et suppression
-const stored = this.challenges.get(key);
-this.challenges.delete(key); // Usage unique
+// Retrieval and deletion
+const challenge = await this.redisService.getChallenge(key);
+await this.redisService.deleteChallenge(key); // One-time use
 ```
 
-**Avantages** :
-- ✅ Simple à implémenter
-- ✅ Rapide (accès mémoire)
-- ✅ Nettoyage automatique (5 minutes)
+**Advantages**:
+- ✅ Automatic expiration via Redis TTL
+- ✅ Fast (in-memory)
+- ✅ Survives server restarts (with persistence)
+- ✅ Works with multiple servers (load balancing)
+- ✅ No manual cleanup needed
 
-**Limitations** (pour la production) :
-- ❌ Perdu au redémarrage du serveur
-- ❌ Ne fonctionne pas avec plusieurs serveurs (load balancing)
-- ❌ Pas de persistance
+**Redis TTL mechanism**:
+- Challenges automatically expire after 5 minutes
+- Prevents memory leaks from abandoned flows
+- One-time use: challenge deleted immediately after verification
 
-**Pour la production** : Utiliser **Redis** ou une base de données pour :
-- Persistance entre redémarrages
-- Partage entre plusieurs serveurs
-- Expiration automatique configurable
-
-## 📁 Structure du projet
+## 📁 Project Structure
 
 ```
 webbauthn-example/
-├── backend/                    # API NestJS
+├── backend/                    # NestJS API
 │   ├── src/
-│   │   ├── auth/              # Module d'authentification
+│   │   ├── auth/              # Authentication module
 │   │   │   ├── auth.controller.ts
 │   │   │   ├── auth.service.ts
 │   │   │   ├── auth.module.ts
 │   │   │   └── dto/           # Data Transfer Objects
 │   │   │       ├── login.dto.ts
 │   │   │       └── register.dto.ts
-│   │   ├── entities/          # Entités TypeORM
+│   │   ├── entities/          # TypeORM entities
 │   │   │   ├── user.entity.ts
 │   │   │   └── credential.entity.ts
+│   │   ├── redis/             # Redis service
+│   │   │   ├── redis.service.ts
+│   │   │   └── redis.module.ts
 │   │   ├── app.module.ts
 │   │   ├── app.controller.ts
-│   │   └── main.ts            # Point d'entrée
+│   │   └── main.ts            # Entry point
 │   ├── Dockerfile
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── frontend/                   # Application React
+├── frontend/                   # React application
 │   ├── src/
-│   │   ├── components/         # Composants Shadcn UI
+│   │   ├── components/         # Shadcn UI components
 │   │   │   └── ui/
 │   │   │       ├── button.tsx
 │   │   │       ├── card.tsx
 │   │   │       ├── input.tsx
 │   │   │       └── ...
-│   │   ├── pages/             # Pages de l'application
+│   │   ├── pages/             # Application pages
 │   │   │   ├── Login.tsx
+│   │   │   │   ├── EmailStep.tsx
+│   │   │   │   ├── PasswordStep.tsx
+│   │   │   │   └── PasskeyStep.tsx
 │   │   │   ├── Register.tsx
 │   │   │   └── Dashboard.tsx
-│   │   ├── services/           # Services API
+│   │   ├── services/           # API services
 │   │   │   └── api.ts
-│   │   ├── lib/               # Utilitaires
+│   │   ├── lib/               # Utilities
 │   │   │   └── utils.ts
 │   │   ├── App.tsx
 │   │   └── main.tsx
@@ -446,16 +513,16 @@ webbauthn-example/
 │   ├── tailwind.config.js
 │   └── tsconfig.json
 │
-├── docker-compose.yml          # Configuration Docker
+├── docker-compose.yml          # Docker configuration
 ├── .gitignore
 └── README.md
 ```
 
 ## 🔌 API Endpoints
 
-### Authentification classique
+### Traditional Authentication
 
-- `POST /auth/register` - Inscription
+- `POST /auth/register` - Registration
   ```json
   {
     "email": "user@example.com",
@@ -465,7 +532,7 @@ webbauthn-example/
   }
   ```
 
-- `POST /auth/login` - Connexion
+- `POST /auth/login` - Login
   ```json
   {
     "email": "user@example.com",
@@ -473,12 +540,12 @@ webbauthn-example/
   }
   ```
 
-- `GET /auth/user/:userId` - Récupérer les informations utilisateur
+- `GET /auth/user/:userId` - Get user information
 
-### WebAuthn - Enregistrement
+### WebAuthn - Registration
 
-- `POST /auth/webauthn/register/options/:userId` - Générer les options d'enregistrement
-- `POST /auth/webauthn/register/verify/:userId` - Vérifier l'enregistrement
+- `POST /auth/webauthn/register/options/:userId` - Generate registration options
+- `POST /auth/webauthn/register/verify/:userId` - Verify registration
   ```json
   {
     "response": { /* attestationResponse */ },
@@ -486,16 +553,16 @@ webbauthn-example/
   }
   ```
 
-### WebAuthn - Authentification
+### WebAuthn - Authentication
 
-- `POST /auth/webauthn/login/options` - Générer les options de connexion (par email)
+- `POST /auth/webauthn/login/options` - Generate login options (by email)
   ```json
   {
     "email": "user@example.com"
   }
   ```
 
-- `POST /auth/webauthn/login/verify` - Vérifier l'authentification
+- `POST /auth/webauthn/login/verify` - Verify authentication
   ```json
   {
     "email": "user@example.com",
@@ -503,23 +570,24 @@ webbauthn-example/
   }
   ```
 
-- `POST /auth/webauthn/authenticate/options/:userId` - Options d'authentification (depuis dashboard)
-- `POST /auth/webauthn/authenticate/verify/:userId` - Vérifier l'authentification
+- `POST /auth/webauthn/authenticate/options/:userId` - Authentication options (from dashboard)
+- `POST /auth/webauthn/authenticate/verify/:userId` - Verify authentication
 
-### Gestion des passkeys
+### Passkey Management
 
-- `POST /auth/webauthn/credential/:userId/:credentialId` - Supprimer une passkey
+- `DELETE /auth/webauthn/credential/:userId/:credentialId` - Delete a passkey
 
 ## ⚙️ Configuration
 
-### Variables d'environnement
+### Environment Variables
 
-#### Backend (`backend/.env` ou docker-compose.yml)
+#### Backend (`backend/.env` or docker-compose.yml)
 
 ```env
 DATABASE_URL=postgresql://webauthn:webauthn123@postgres:5432/webauthn_db
 PORT=3001
 ORIGIN=http://localhost:5173
+REDIS_URL=redis://redis:6379
 ```
 
 #### Frontend (`frontend/.env`)
@@ -528,85 +596,94 @@ ORIGIN=http://localhost:5173
 VITE_API_URL=http://localhost:3001
 ```
 
-### Configuration WebAuthn
+### WebAuthn Configuration
 
-Dans `backend/src/auth/auth.service.ts`, vous pouvez modifier :
+In `backend/src/auth/auth.service.ts`, you can modify:
 
 ```typescript
-private rpName = "WebAuthn Example";  // Nom de votre application
-private rpID = "localhost";            // Domaine (localhost pour dev)
-private origin = "http://localhost:5173"; // Origine autorisée
+private rpName = "WebAuthn Example";  // Your application name
+private rpID = "localhost";            // Domain (localhost for dev)
+private origin = "http://localhost:5173"; // Allowed origin
 ```
 
-⚠️ **Important** : Pour la production, `rpID` doit correspondre à votre domaine (sans protocole ni port).
+⚠️ **Important**: For production, `rpID` must match your domain (without protocol or port).
 
-## 💻 Développement
+## 💻 Development
 
-### Scripts disponibles
+### Available Scripts
 
 #### Backend
 
 ```bash
 cd backend
-npm run start:dev      # Démarrage en mode développement avec hot-reload
-npm run build          # Compilation TypeScript
-npm run start:prod     # Démarrage en mode production
-npm run lint           # Linter le code
-npm run test           # Exécuter les tests
+npm run start:dev      # Start in development mode with hot-reload
+npm run build          # Compile TypeScript
+npm run start:prod     # Start in production mode
+npm run lint           # Lint code
+npm run test           # Run tests
 ```
 
 #### Frontend
 
 ```bash
 cd frontend
-npm run dev            # Démarrage du serveur de développement
-npm run build          # Build de production
-npm run preview        # Prévisualiser le build de production
+npm run dev            # Start development server
+npm run build          # Production build
+npm run preview        # Preview production build
 ```
 
 ### Hot-reload
 
-Avec Docker Compose, les volumes montés permettent le hot-reload :
-- Les modifications dans `backend/src/` rechargent automatiquement le serveur
-- Les modifications dans `frontend/src/` rechargent automatiquement le navigateur
+With Docker Compose, mounted volumes enable hot-reload:
+- Changes in `backend/src/` automatically reload the server
+- Changes in `frontend/src/` automatically reload the browser
 
-### Base de données
+### Database
 
-Pour accéder à PostgreSQL via Docker :
+To access PostgreSQL via Docker:
 
 ```bash
 docker exec -it webauthn-postgres psql -U webauthn -d webauthn_db
 ```
 
+### Redis
+
+To access Redis via Docker:
+
+```bash
+docker exec -it webauthn-redis redis-cli
+```
+
 ## 🚢 Production
 
-### Préparations nécessaires
+### Required Preparations
 
-1. **Domaine et HTTPS**
-   - WebAuthn nécessite HTTPS en production (sauf localhost)
-   - Configurez un certificat SSL valide
-   - Mettez à jour `rpID` dans `auth.service.ts` avec votre domaine
+1. **Domain and HTTPS**
+   - WebAuthn requires HTTPS in production (except localhost)
+   - Configure a valid SSL certificate
+   - Update `rpID` in `auth.service.ts` with your domain
 
-2. **Variables d'environnement**
-   - Créez des fichiers `.env` sécurisés
-   - Utilisez des mots de passe forts pour PostgreSQL
-   - Configurez `ORIGIN` avec votre domaine de production
+2. **Environment Variables**
+   - Create secure `.env` files
+   - Use strong passwords for PostgreSQL
+   - Configure `ORIGIN` with your production domain
 
-3. **Gestion des challenges**
-   - Remplacez le stockage en mémoire par **Redis** ou une base de données
-   - Implémentez une expiration automatique des challenges
+3. **Challenge Management**
+   - Redis is already implemented with automatic TTL
+   - Challenges expire automatically after 5 minutes
+   - One-time use prevents replay attacks
 
 4. **Sessions**
-   - Ajoutez une gestion de session sécurisée (JWT, sessions serveur)
-   - Configurez les cookies sécurisés (HttpOnly, Secure, SameSite)
+   - Add secure session management (JWT, server sessions)
+   - Configure secure cookies (HttpOnly, Secure, SameSite)
 
-5. **Sécurité**
-   - Activez CORS avec des origines spécifiques
-   - Implémentez rate limiting
-   - Ajoutez des logs de sécurité
-   - Configurez des headers de sécurité (Helmet)
+5. **Security**
+   - Enable CORS with specific origins
+   - Implement rate limiting
+   - Add security logs
+   - Configure security headers (Helmet)
 
-### Build de production
+### Production Build
 
 ```bash
 # Backend
@@ -617,68 +694,82 @@ npm run start:prod
 # Frontend
 cd frontend
 npm run build
-# Servir le dossier dist/ avec un serveur web (nginx, etc.)
+# Serve the dist/ folder with a web server (nginx, etc.)
 ```
 
-## 🐛 Dépannage
+## 🐛 Troubleshooting
 
-### Erreur "database does not exist"
+### Error "database does not exist"
 
-Assurez-vous que PostgreSQL est démarré et que la base de données est créée :
+Make sure PostgreSQL is started and the database is created:
 
 ```bash
 docker-compose up postgres -d
 ```
 
-### Erreur "Challenge not found"
+### Error "Challenge not found"
 
-Les challenges sont stockés en mémoire et expirent après 5 minutes. Si vous attendez trop longtemps entre la génération des options et la vérification, vous devrez recommencer.
+Challenges are stored in Redis and expire after 5 minutes. If you wait too long between generating options and verification, you'll need to start over.
 
-### Passkey ne fonctionne pas
+### Passkey doesn't work
 
-1. Vérifiez que vous utilisez HTTPS (ou localhost)
-2. Assurez-vous que votre navigateur supporte WebAuthn
-3. Vérifiez la console du navigateur pour les erreurs
-4. Vérifiez les logs du backend
+1. Verify you're using HTTPS (or localhost)
+2. Make sure your browser supports WebAuthn
+3. Check the browser console for errors
+4. Check backend logs
 
-### Erreur CORS
+### CORS Error
 
-Vérifiez que `ORIGIN` dans le backend correspond à l'URL du frontend.
+Verify that `ORIGIN` in the backend matches the frontend URL.
 
-### Port déjà utilisé
+### Port already in use
 
-Modifiez les ports dans `docker-compose.yml` si nécessaire :
+Modify ports in `docker-compose.yml` if necessary:
 
 ```yaml
 ports:
-  - "3002:3001"  # Backend sur port 3002
-  - "5174:5173"  # Frontend sur port 5174
+  - "3002:3001"  # Backend on port 3002
+  - "5174:5173"  # Frontend on port 5174
 ```
 
-## 📝 Notes importantes
+### Redis connection error
 
-- ⚠️ Ce projet est un **exemple éducatif**. Pour la production, ajoutez :
-  - Validation côté serveur plus robuste
-  - Gestion d'erreurs complète
-  - Logs et monitoring
-  - Tests unitaires et d'intégration
-  - Documentation API (Swagger/OpenAPI)
+Make sure Redis is running:
 
-- 🔒 **Sécurité** : Les mots de passe sont hashés avec bcrypt, mais en production, ajoutez :
+```bash
+docker-compose up redis -d
+```
+
+Check Redis connection:
+
+```bash
+docker exec -it webauthn-redis redis-cli ping
+```
+
+## 📝 Important Notes
+
+- ⚠️ This project is an **educational example**. For production, add:
+  - More robust server-side validation
+  - Complete error handling
+  - Logs and monitoring
+  - Unit and integration tests
+  - API documentation (Swagger/OpenAPI)
+
+- 🔒 **Security**: Passwords are hashed with bcrypt, but in production, add:
   - Rate limiting
-  - Protection CSRF
-  - Validation d'email (vérification par email)
-  - Mots de passe plus forts
+  - CSRF protection
+  - Email validation (email verification)
+  - Stronger passwords
 
 ## 📄 License
 
-MIT License - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+MIT License - See the [LICENSE](LICENSE) file for more details.
 
-## 🤝 Contribution
+## 🤝 Contributing
 
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
+Contributions are welcome! Feel free to open an issue or pull request.
 
-## 📚 Ressources
+## 📚 Resources
 
 - [WebAuthn Specification](https://www.w3.org/TR/webauthn-2/)
 - [SimpleWebAuthn Documentation](https://simplewebauthn.dev/)

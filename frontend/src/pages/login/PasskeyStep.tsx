@@ -54,11 +54,9 @@ export function PasskeyStep({
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">
-            Authentification par passkey
-          </CardTitle>
+          <CardTitle className="text-2xl">Passkey Authentication</CardTitle>
           <CardDescription>
-            Confirmez votre identité avec votre passkey
+            Confirm your identity with your passkey
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -78,8 +76,8 @@ export function PasskeyStep({
           {/* Instructions for user */}
           <Alert>
             <AlertDescription>
-              Cliquez sur le bouton ci-dessous pour confirmer avec votre passkey
-              (Touch ID, Face ID, ou clé de sécurité).
+              Click the button below to confirm with your passkey (Touch ID,
+              Face ID, or security key).
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -91,9 +89,7 @@ export function PasskeyStep({
             className="w-full"
           >
             <Key className="mr-2 h-4 w-4" />
-            {authenticating
-              ? "Authentification en cours..."
-              : "Confirmer avec ma passkey"}
+            {authenticating ? "Authenticating..." : "Confirm with my passkey"}
           </Button>
 
           {/* Back button to previous step */}
@@ -104,7 +100,7 @@ export function PasskeyStep({
             className="w-full"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour
+            Back
           </Button>
         </CardFooter>
       </Card>

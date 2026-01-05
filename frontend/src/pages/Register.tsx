@@ -90,16 +90,16 @@ function Register() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Inscription</CardTitle>
+          <CardTitle className="text-2xl">Register</CardTitle>
           <CardDescription>
-            Créez un compte pour commencer à utiliser WebAuthn
+            Create an account to start using WebAuthn
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {/* First name field */}
             <div className="space-y-2">
-              <Label htmlFor="firstName">Prénom</Label>
+              <Label htmlFor="firstName">First Name</Label>
               <Input
                 id="firstName"
                 type="text"
@@ -111,7 +111,7 @@ function Register() {
 
             {/* Last name field */}
             <div className="space-y-2">
-              <Label htmlFor="lastName">Nom</Label>
+              <Label htmlFor="lastName">Last Name</Label>
               <Input
                 id="lastName"
                 type="text"
@@ -135,7 +135,7 @@ function Register() {
 
             {/* Password field */}
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -155,12 +155,12 @@ function Register() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Inscription..." : "S'inscrire"}
+              {loading ? "Registering..." : "Register"}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
-              Déjà un compte ?{" "}
+              Already have an account?{" "}
               <Link to="/login" className="text-primary hover:underline">
-                Se connecter
+                Login
               </Link>
             </p>
           </CardFooter>

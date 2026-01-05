@@ -136,11 +136,11 @@ function Dashboard() {
 
       // Step 5: Reload user information
       await loadUser(userId);
-      alert("Passkey ajoutée avec succès !");
+      alert("Passkey added successfully!");
     } catch (err: any) {
       // Handle WebAuthn-specific errors
       if (err.name === "NotAllowedError") {
-        setError("L'ajout de la passkey a été annulé");
+        setError("Passkey addition was cancelled");
       } else {
         setError(err.message || "Failed to add passkey");
       }
@@ -164,7 +164,7 @@ function Dashboard() {
   const handleAuthenticateWithPasskey = useCallback(async () => {
     const userId = localStorage.getItem("userId");
     if (!userId || !user?.credentials || user.credentials.length === 0) {
-      setError("Aucune passkey disponible");
+      setError("No passkey available");
       return;
     }
 
@@ -183,11 +183,11 @@ function Dashboard() {
 
       // Step 3: Signature verification by backend
       await api.verifyAuthentication(userId, assertionResponse);
-      alert("Authentification réussie avec la passkey !");
+      alert("Authentication successful with passkey!");
     } catch (err: any) {
       // Handle WebAuthn-specific errors
       if (err.name === "NotAllowedError") {
-        setError("L'authentification a été annulée");
+        setError("Authentication was cancelled");
       } else {
         setError(err.message || "Authentication failed");
       }
@@ -207,7 +207,7 @@ function Dashboard() {
       if (!userId) return;
 
       // Confirmation before deletion
-      if (!confirm("Êtes-vous sûr de vouloir supprimer cette passkey ?")) {
+      if (!confirm("Are you sure you want to delete this passkey?")) {
         return;
       }
 
@@ -238,7 +238,7 @@ function Dashboard() {
       <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-4xl">
           <CardContent className="pt-6">
-            <p className="text-center">Chargement...</p>
+            <p className="text-center">Loading...</p>
           </CardContent>
         </Card>
       </div>
@@ -255,12 +255,10 @@ function Dashboard() {
       <div className="mx-auto max-w-4xl space-y-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-3xl font-bold">
-              Tableau de bord
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold">Dashboard</CardTitle>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Déconnexion
+              Logout
             </Button>
           </CardHeader>
           <CardContent>
@@ -268,15 +266,15 @@ function Dashboard() {
               {/* Section: Account information */}
               <div>
                 <h2 className="mb-4 text-xl font-semibold">
-                  Informations du compte
+                  Account Information
                 </h2>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Prénom</p>
+                    <p className="text-sm text-muted-foreground">First Name</p>
                     <p className="font-medium">{user.firstName}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Nom</p>
+                    <p className="text-sm text-muted-foreground">Last Name</p>
                     <p className="font-medium">{user.lastName}</p>
                   </div>
                   <div className="space-y-1">
@@ -308,9 +306,7 @@ function Dashboard() {
                     className="flex items-center gap-2"
                   >
                     <Key className="h-4 w-4" />
-                    {addingPasskey
-                      ? "Ajout en cours..."
-                      : "Ajouter une passkey"}
+                    {addingPasskey ? "Adding..." : "Add passkey"}
                   </Button>
 
                   {/* Button: Test passkey (only shown if passkeys exist) */}
@@ -320,9 +316,7 @@ function Dashboard() {
                       onClick={handleAuthenticateWithPasskey}
                       disabled={authenticating}
                     >
-                      {authenticating
-                        ? "Authentification..."
-                        : "Tester la passkey"}
+                      {authenticating ? "Authenticating..." : "Test passkey"}
                     </Button>
                   )}
                 </div>
@@ -331,7 +325,7 @@ function Dashboard() {
                 {user.credentials && user.credentials.length > 0 ? (
                   <div className="space-y-3">
                     <h3 className="font-medium">
-                      Passkeys enregistrées ({user.credentials.length})
+                      Registered Passkeys ({user.credentials.length})
                     </h3>
                     {user.credentials.map((credential: Credential) => (
                       <Card key={credential.id}>
@@ -341,10 +335,10 @@ function Dashboard() {
                               {credential.deviceType}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              Ajoutée le{" "}
+                              Added on{" "}
                               {new Date(
                                 credential.createdAt
-                              ).toLocaleDateString("fr-FR")}
+                              ).toLocaleDateString("en-US")}
                             </p>
                           </div>
                           {/* Button: Delete passkey */}
@@ -366,8 +360,7 @@ function Dashboard() {
                   <Card>
                     <CardContent className="pt-6">
                       <p className="text-center text-muted-foreground">
-                        Aucune passkey enregistrée. Ajoutez-en une pour vous
-                        connecter plus facilement !
+                        No passkey registered. Add one to login more easily!
                       </p>
                     </CardContent>
                   </Card>

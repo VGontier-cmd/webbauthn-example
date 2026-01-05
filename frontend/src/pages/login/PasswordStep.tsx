@@ -65,10 +65,8 @@ export function PasswordStep({
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Connexion</CardTitle>
-          <CardDescription>
-            Connectez-vous avec votre mot de passe ou votre passkey
-          </CardDescription>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>Login with your password or passkey</CardDescription>
         </CardHeader>
         <form onSubmit={onPasswordLogin}>
           <CardContent className="space-y-4">
@@ -86,13 +84,13 @@ export function PasswordStep({
 
             {/* Password field */}
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => onPasswordChange(e.target.value)}
-                placeholder="Entrez votre mot de passe"
+                placeholder="Enter your password"
                 required
                 autoFocus
               />
@@ -112,7 +110,7 @@ export function PasswordStep({
               disabled={loading || !password}
               className="w-full"
             >
-              {loading ? "Connexion..." : "Se connecter avec mot de passe"}
+              {loading ? "Logging in..." : "Login with password"}
             </Button>
 
             {/* Visual separator */}
@@ -121,7 +119,7 @@ export function PasswordStep({
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Ou</span>
+                <span className="bg-card px-2 text-muted-foreground">Or</span>
               </div>
             </div>
 
@@ -135,8 +133,8 @@ export function PasswordStep({
             >
               <Key className="mr-2 h-4 w-4" />
               {generatingOptions
-                ? "Génération des options..."
-                : "Se connecter avec une passkey"}
+                ? "Generating options..."
+                : "Login with passkey"}
             </Button>
 
             {/* Back button to email step */}
@@ -147,7 +145,7 @@ export function PasswordStep({
               className="w-full"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour
+              Back
             </Button>
           </CardFooter>
         </form>

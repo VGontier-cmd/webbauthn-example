@@ -101,7 +101,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // Recherche de l'utilisateur par email
+    // Find user by email
     const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
@@ -363,7 +363,7 @@ export class AuthService {
    * @throws BadRequestException if user has no passkeys
    */
   async generateAuthenticationOptionsByEmail(email: string) {
-    // Recherche de l'utilisateur par email
+    // Find user by email
     const user = await this.userRepository.findOne({
       where: { email },
       relations: ["credentials"],
@@ -462,7 +462,7 @@ export class AuthService {
         authenticator: {
           credentialID: Buffer.from(credential.credentialId, "base64url"),
           credentialPublicKey: Buffer.from(credential.publicKey, "base64"),
-          counter: credential.counter, // Compteur anti-replay
+          counter: credential.counter, // Anti-replay counter
         },
         requireUserVerification: false,
       });
